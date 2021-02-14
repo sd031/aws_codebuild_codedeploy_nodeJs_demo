@@ -31,4 +31,4 @@ sudo service codedeploy-agent status
 
 # Deploy the files on S3
 ```
-aws deploy push --application-name CodeDeployDemo --s3-location s3://devops-with-aws-sandip/codedeploydemo/app.zip --ignore-hidden-files --region us-west-2
+aws deploy push --application-name codeDeployDemo --s3-location s3://devops-with-aws-sandip/codedeploydemo/app.zip --ignore-hidden-files --region us-west-2
