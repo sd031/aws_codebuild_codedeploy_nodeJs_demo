@@ -1,0 +1,24 @@
+{
+  "name": "codedeploydemo",
+  "version": "1.0.0",
+  "description": "To show how CodeDeploy Works",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git-codecommit.us-west-2.amazonaws.com/v1/repos/codeDeployDemo"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "Sandip Das",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

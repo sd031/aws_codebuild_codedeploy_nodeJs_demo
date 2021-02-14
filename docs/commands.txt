@@ -1,0 +1,34 @@
+
+# Installing the CodeDeploy agent on EC2
+```
+Ubuntu:
+sudo apt-get update
+On Ubuntu Server 14.04:
+
+sudo apt-get install ruby2.0
+On Ubuntu Server 16.04 or 18.04:
+
+sudo apt-get install ruby
+sudo apt-get install wget
+
+cd /home/ubuntu
+
+wget https://aws-codedeploy-us-west-2.s3.us-west-2.amazonaws.com/latest/install
+chmod +x ./install
+sudo ./install auto
+sudo service codedeploy-agent status
+
+
+
+
+sudo yum update -y
+sudo yum install -y ruby wget
+wget https://aws-codedeploy-eu-west-1.s3.eu-west-1.amazonaws.com/latest/install
+chmod +x ./install
+sudo ./install auto
+sudo service codedeploy-agent status
+```
+
+# Deploy the files on S3
+```
+aws deploy push --application-name CodeDeployDemo --s3-location s3://devops-with-aws-sandip/codedeploydemo/app.zip --ignore-hidden-files --region us-west-2
