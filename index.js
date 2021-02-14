@@ -3,7 +3,7 @@ const app = express()
 const port = 3000
 
 app.get('/', (req, res) => {
-  res.send('CodeDeploy Sample V8!')
+  res.send('CodeDeploy Sample V1!')
 })
 
 app.get('/status', (req, res) => {
