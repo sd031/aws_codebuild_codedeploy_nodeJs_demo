@@ -4,7 +4,6 @@ echo Check Below
 echo $CONFIG_PATH
 rm -rf $CONFIG_PATH
 echo "{}" >> $CONFIG_PATH
-#touch ./config/production.json
 json -I -f $CONFIG_PATH \
       -e "this.DB_HOST='$DB_HOST'" \
       -e "this.DB_USERNAME='$DB_USERNAME'" \
