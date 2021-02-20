@@ -1,5 +1,5 @@
 #!/bin/bash
-CONFIG_PATH="/config/production.json"
+CONFIG_PATH="./config/production.json"
 echo Check Below
 echo $CONFIG_PATH
 mkdir config
