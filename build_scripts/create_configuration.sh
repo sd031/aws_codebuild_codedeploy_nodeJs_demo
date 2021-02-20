@@ -1,8 +1,8 @@
 #!/bin/bash
-CONFIG_PATH=./config/production.json
+CONFIG_PATH="/config/production.json"
 echo Check Below
 echo $CONFIG_PATH
-rm -rf $CONFIG_PATH
+mkdir config
 echo "{}" >> $CONFIG_PATH
 echo $PWD
 json -I -f $CONFIG_PATH \
