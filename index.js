@@ -5,15 +5,13 @@ const config = require('config')
 console.log(config);
 
 app.get('/', (req, res) => {
-  res.send('CodeDeploy Sample V3!')
+  res.send('CodeDeploy Sample v5!')
 })
 
 app.get('/status', (req, res) => {
     res.send('ok')
   })
-app.get('/check_configuration', (req, res) => {
-    res.json(config)
-  })
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
