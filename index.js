@@ -5,7 +5,7 @@ const config = require('config')
 console.log(config);
 
 app.get('/', (req, res) => {
-  res.send('CodeDeploy Sample V3!')
+  res.send('CodeDeploy Sample V4!')
 })
 
 app.get('/status', (req, res) => {
