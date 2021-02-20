@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
-const port = 3000
+const port = 3000;
+const config = require('config')
+console.log(config);
 
 app.get('/', (req, res) => {
   res.send('CodeDeploy Sample V3!')
