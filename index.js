@@ -11,7 +11,9 @@ app.get('/', (req, res) => {
 app.get('/status', (req, res) => {
     res.send('ok')
   })
-
+app.get('/check_configuration', (req, res) => {
+    res.json(config)
+  })
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
