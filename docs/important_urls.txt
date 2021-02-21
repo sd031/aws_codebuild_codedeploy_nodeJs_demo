@@ -1,8 +1,0 @@
-https://us-west-2.console.aws.amazon.com/console/home?region=us-west-2
-https://s3.console.aws.amazon.com/s3/object/devops-with-aws-sandip-youtube?region=us-west-2&prefix=codedeploydemo%2Fapp.zip&tab=versions
-https://us-west-2.console.aws.amazon.com/codesuite/codebuild/projects?region=us-west-2&projects-meta=eyJmIjp7InRleHQiOiIiLCJzaGFyZWQiOmZhbHNlfSwicyI6eyJwcm9wZXJ0eSI6IkxBU1RfTU9ESUZJRURfVElNRSIsImRpcmVjdGlvbiI6LTF9LCJuIjoyMCwiaSI6MH0
-https://us-west-2.console.aws.amazon.com/codesuite/codedeploy/deployments/d-KJH4MXLM8/instances/arn%3Aaws%3Aec2%3Aus-west-2%3A120717539064%3Ainstance/i-0200ed2b5a6b96962?region=us-west-2
-https://us-west-2.console.aws.amazon.com/systems-manager/parameters/create?region=us-west-2
-https://www.npmjs.com/package/config
-https://www.npmjs.com/package/json
-https://github.com/nvm-sh/nvm

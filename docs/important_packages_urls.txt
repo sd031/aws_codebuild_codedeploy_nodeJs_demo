@@ -1,0 +1,3 @@
+https://www.npmjs.com/package/config
+https://www.npmjs.com/package/json
+https://github.com/nvm-sh/nvm
