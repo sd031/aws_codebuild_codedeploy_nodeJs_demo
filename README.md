@@ -17,7 +17,9 @@ You can  enavironment variable : CODE_DEPLOY_APPLICATION_NAME, CODE_DEPLOY_S3_BU
 Check Previous Videos to make sense of this implementation:
 
 AWS CodeCommit (Ep.1): https://www.youtube.com/watch?v=0649R_Fk9_E
+
 AWS CodeBuild (Ep.2): https://www.youtube.com/watch?v=rxZniDstaa
+
 AWS CodeDeploy(Ep.3): https://www.youtube.com/watch?v=mtby2y2aSeU
 
 Keep learning , Keep improving 
