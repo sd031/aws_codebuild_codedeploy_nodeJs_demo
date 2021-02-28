@@ -2,14 +2,14 @@
 # Installing the CodeDeploy agent on EC2
 ```
 Ubuntu:
-sudo apt-get update
+sudo apt-get update -y 
 On Ubuntu Server 14.04:
 
 sudo apt-get install ruby2.0
 On Ubuntu Server 16.04 or 18.04:
 
-sudo apt-get install ruby
-sudo apt-get install wget
+sudo apt-get install ruby -y 
+sudo apt-get install wget -y
 
 cd /home/ubuntu
 
