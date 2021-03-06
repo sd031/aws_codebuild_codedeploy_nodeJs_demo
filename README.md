@@ -16,11 +16,7 @@ You can enavironment variable in code build : CODE_DEPLOY_APPLICATION_NAME, CODE
 
 Check Previous Videos to make sense of this implementation:
 
-AWS CodeCommit (Ep.1): https://www.youtube.com/watch?v=0649R_Fk9_E
 
-AWS CodeBuild (Ep.2): https://www.youtube.com/watch?v=rxZniDstaa
-
-AWS CodeDeploy(Ep.3): https://www.youtube.com/watch?v=mtby2y2aSeU
 
 Keep learning , Keep improving 
 
@@ -40,3 +36,9 @@ cd /home/ubuntu
 wget https://aws-codedeploy-us-west-2.s3.us-west-2.amazonaws.com/latest/install
 chmod +x ./install
 sudo ./install auto
+
+
+node-app-youtube-demo
+
+
+aws deploy push --application-name NodeAppServerDeployment --s3-location "s3://node-app-youtube-demo/codedeploydemo/app.zip" --ignore-hidden-files 
