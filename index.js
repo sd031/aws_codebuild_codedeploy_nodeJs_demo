@@ -1,11 +1,11 @@
 const express = require('express')
 const app = express()
-const port = 3000;
+const port = process.env.PORT || 3000 ;
 const config = require('config')
 console.log(config);
 
 app.get('/', (req, res) => {
-  res.send('CodeDeploy Sample v1!')
+  res.send('cicd v2!')
 })
 
 app.get('/status', (req, res) => {
