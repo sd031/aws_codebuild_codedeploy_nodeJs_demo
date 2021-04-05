@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "."
+		},
+		{
+			"path": "../serverless_demo"
 		}
 	],
 	"settings": {}

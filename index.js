@@ -5,11 +5,18 @@ const config = require('config')
 console.log(config);
 
 app.get('/', (req, res) => {
-  res.send('cicd v2!')
+  res.send('cicd v3!')
 })
 
 app.get('/status', (req, res) => {
     res.send('ok')
+  })
+
+  app.get('/check-env', (req, res) => {
+    res.json({
+      DB_NAME : process.env.DB_NAME,
+      DB_USER: process.env.DB_USER,
+    })
   })
 
 app.listen(port, () => {

@@ -1,4 +1,6 @@
 version: 0.2
+run-as: root
+
 
 phases:
   pre_build:
