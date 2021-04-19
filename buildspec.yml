@@ -21,8 +21,6 @@ phases:
   post_build:
     commands:
       - echo Build completed on `date`
-      #- aws deploy push --application-name codeDeployDemoSandip --s3-location s3://devops-with-aws-sandip-youtube/codedeploydemo/app.zip --ignore-hidden-files --region us-west-2
-      # - aws deploy push --application-name "${CODE_DEPLOY_APPLICATION_NAME}" --s3-location "s3://${CODE_DEPLOY_S3_BUCKET}/codedeploydemo/app.zip" --ignore-hidden-files --region us-west-2
 artifacts:
   files:
     - '**/*'
