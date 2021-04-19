@@ -1,4 +1,4 @@
-FROM 120717539064.dkr.ecr.us-west-2.amazonaws.com/node:14
+FROM node:14
 
 RUN apt-get update
 
