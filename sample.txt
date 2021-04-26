@@ -1,0 +1,14 @@
+Learn how to make 2x Faster Docker Build in AWS Cloud using AWS CodeBuild Cache system
+Build Cache is so important part and many miss the point
+1) Process time reduce by nearly up to 90%
+2) Don't compile which is already compiled
+3) Re-use the assets/artifacts that you have made
+4) Don't pull the entire repo, instead just pull what exactly changes (saves a lot of time)
+5) If you are building docker containers, it makes a lot of sense to store docker layers
+6) If your dependencies are all downloaded from the internet, don't do it every time instead store in s3 so that download will be a lot faster
+
+This list can go on and on...
+
+Feel free to watch this tutorial and let me know if have any query 
+
+https://www.youtube.com/watch?v=X79lCrFpEmU

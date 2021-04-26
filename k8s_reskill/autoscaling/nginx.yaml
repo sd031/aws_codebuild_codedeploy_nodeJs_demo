@@ -1,0 +1,22 @@
+apiVersion: app/v1
+kind: Deployment
+metadata:
+  name: nginx-scaleout
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: nginx
+        app: nginx
+    spec:
+      containers:
+      - image: nginx
+        name: nginx-scaleout
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 500m
+            memory: 512Mi
