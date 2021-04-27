@@ -1,16 +1,44 @@
 apiVersion: v1
 data:
   mapRoles: |
-    - rolearn: arn:aws:iam::120717539064:role/NodeInstanceRole
+    - rolearn: arn:aws:iam::120717539064:role/service-role/codebuild-samplecicddemo-service-role
       username: system:node:{{EC2PrivateDNSName}}
       groups:
-      - system:bootstrappers
-      - system:nodes      
-    - rolearn: arn:aws:iam::120717539064:role/service-role/codebuild-samplecicddemo-service-role
-      username: codebuild-samplecicddemo-service-role
-      groups:
-        - system:masters        
+        - system:bootstrappers
+        - system:nodes
+        - system:masters
+  mapUsers: |
+    []
 kind: ConfigMap
 metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"mapRoles":"- rolearn: arn:aws:iam::120717539064:role/service-role/codebuild-samplecicddemo-service-role\n  username: system:node:{{EC2PrivateDNSName}}\n  groups:\n    - system:bootstrappers\n    - system:nodes\n"},"kind":"ConfigMap","metadata":{"annotations":{},"name":"aws-auth","namespace":"kube-system"}}
+  creationTimestamp: "2021-04-25T21:17:41Z"
+  managedFields:
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:data:
+        .: {}
+        f:mapUsers: {}
+    manager: eksctl
+    operation: Update
+    time: "2021-04-25T21:17:41Z"
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:data:
+        f:mapRoles: {}
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+    manager: kubectl
+    operation: Update
+    time: "2021-04-27T04:26:27Z"
   name: aws-auth
   namespace: kube-system
+  resourceVersion: "327185"
+  selfLink: /api/v1/namespaces/kube-system/configmaps/aws-auth
+  uid: a67fcc4b-f7f8-4796-9c1a-1e5f72ca1657
