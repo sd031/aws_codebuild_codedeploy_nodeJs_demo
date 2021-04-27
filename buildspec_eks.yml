@@ -43,5 +43,5 @@ phases:
       - echo Pushing the Docker image...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - echo Push the latest image to cluster
-      - kubectl apply -f k8s/deployment/deployment.yaml
-      - kubectl rollout restart -f k8s/deployment/deployment.yaml
+      - kubectl apply -f eks_cicd/deployment.yaml
+      - kubectl rollout restart -f eks_cicd/deployment.yaml
