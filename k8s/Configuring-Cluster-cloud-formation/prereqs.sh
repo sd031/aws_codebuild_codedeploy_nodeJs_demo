@@ -51,9 +51,9 @@ fi
 
 # kubectx/kubens
 if ! type kubectx >/dev/null 2>&1; then
-	sudo git clone https://github.com/ahmetb/kubectx /opt/kubectx
-	sudo ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx
-	sudo ln -s /opt/kubectx/kubens /usr/local/bin/kubens
+	git clone https://github.com/ahmetb/kubectx /opt/kubectx
+	ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx
+	ln -s /opt/kubectx/kubens /usr/local/bin/kubens
 	echo 'kubectx installed'
 else
 	echo 'kubectx already installed'
