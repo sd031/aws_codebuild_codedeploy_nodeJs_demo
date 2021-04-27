@@ -1,0 +1,16 @@
+apiVersion: v1
+data:
+  mapRoles: |
+    - rolearn: arn:aws:iam::120717539064:role/NodeInstanceRole
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+      - system:bootstrappers
+      - system:nodes      
+    - rolearn: arn:aws:iam::120717539064:role/service-role/codebuild-samplecicddemo-service-role
+      username: codebuild-samplecicddemo-service-role
+      groups:
+        - system:masters        
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
