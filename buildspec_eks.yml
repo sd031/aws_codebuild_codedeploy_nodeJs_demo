@@ -13,8 +13,8 @@ phases:
       - source ~/.bashrc
       - echo 'Check kubectl version'
       - kubectl version --short --client
-      - chmod +x k8s/Configuring-Cluster-cloud-formation/prereqs.sh
-      - sh k8s/Configuring-Cluster-cloud-formation/prereqs.sh
+      - chmod +x eks_cicd/prereqs.sh
+      - sh eks_cicd/prereqs.sh
 
   pre_build:
     commands:
