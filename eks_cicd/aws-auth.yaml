@@ -1,34 +1,16 @@
 apiVersion: v1
-data:
-  mapRoles: |
-    - groups:
-      - system:bootstrappers
-      - system:nodes
-      rolearn: arn:aws:iam::120717539064:role/eksctl-cicd-demo-nodegroup-ng-1-NodeInstanceRole-AHYQIRO1R4HE
-      username: system:node:{{EC2PrivateDNSName}}
-    
-    - rolearn: arn:aws:iam::120717539064:role/service-role/codebuild-cicddemobuildproject-service-role
-      username: codebuild-cicddemobuildproject-service-role
-      groups:
-        - system:masters  
-  mapUsers: |
-    []
 kind: ConfigMap
 metadata:
-  creationTimestamp: "2021-04-27T20:43:23Z"
-  managedFields:
-  - apiVersion: v1
-    fieldsType: FieldsV1
-    fieldsV1:
-      f:data:
-        .: {}
-        f:mapRoles: {}
-        f:mapUsers: {}
-    manager: eksctl
-    operation: Update
-    time: "2021-04-27T20:43:23Z"
   name: aws-auth
   namespace: kube-system
-  resourceVersion: "1559"
-  selfLink: /api/v1/namespaces/kube-system/configmaps/aws-auth
-  uid: 414c6bae-79e4-4f24-a1d5-d30e615c904c
+data:
+  mapRoles: |
+    - rolearn: arn:aws:iam::11122223333:role/EKS-Worker-NodeInstanceRole-1I00GBC9U4U7B
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+    - rolearn: arn:aws:iam::11122223333:role/designated_role
+      username: designated_role
+      groups:
+        - system:masters
