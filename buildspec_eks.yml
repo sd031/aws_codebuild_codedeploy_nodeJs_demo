@@ -19,7 +19,7 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon EKS...
-      - aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name $AWS_CLUSTER_NAME --role-arn arn:aws:iam::120717539064:role/service-role/codebuild-cicddemobuildproject-service-role
+      - aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name $AWS_CLUSTER_NAME
       - echo check config 
       - kubectl config view --minify
       - echo check kubectl access
