@@ -1,0 +1,26 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+    commands:
+      - echo Getting Started
+  pre_build:
+    commands:
+      - echo Installing some packages and source NPM dependencies...
+      - npm install -g json
+      - chmod +x ./build_scripts/create_configuration.sh
+      - sh ./build_scripts/create_configuration.sh
+      - npm install
+      - aws --version
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Run all of your build related code if any
+      - echo Build finished, now moving to S3
+  post_build:
+    commands:
+      - echo Build completed on `date`
+artifacts:
+  files:
+    - '**/*'
