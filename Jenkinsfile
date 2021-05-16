@@ -1,33 +1,45 @@
 pipeline {
-  agent any
-    
-  tools {nodejs "node"} 
-    
-  stages {
-        
-    stage('Source:Git') {
-      steps {
-        git 'https://github.com/sd031/aws_codebuild_codedeploy_nodeJs_demo.git'
-      }
+    agent any
+    tools {nodejs "node16" }
+    environment {
+        NODE_ENV='production'
     }
-     
-    stage('Build:Node') {
-      steps {
-        sh 'npm install'
-        // sh '<<Build Command>>' run any commands as needed
-      }
-    }  
+    
+  
+    stages {
+        stage('source') {
+            steps {
+               git 'https://github.com/sd031/aws_codebuild_codedeploy_nodeJs_demo.git'
+               
+            }
             
-    // stage('Test') {
-    //   steps {
-    //     sh 'node test'
-    //   }
-    // }
-
-     stage('Save:Artifact') {
-      steps {
-       archiveArtifacts artifacts: ./
-      }
-    }  
-  }
+        }
+        
+         stage('build') {
+             environment{
+                 NODE_ENV='StagingGitTest'
+             }
+             
+            
+            steps {
+             echo NODE_ENV
+             withCredentials([string(credentialsId: 'e8f8ff88-49e0-433a-928d-36a518cd30d6', variable: 'secver')]) {
+                // some block
+                echo secver
+            }
+                         sh 'npm install'
+            }
+            
+        }
+        
+         stage('saveArtifact') {
+            steps {
+              archiveArtifacts artifacts: '**', followSymlinks: false
+            }
+            
+        }
+        
+        
+        
+    }
 }
