@@ -5,13 +5,13 @@ pipeline {
     
   stages {
         
-    stage('Git') {
+    stage('Source:Git') {
       steps {
         git 'https://github.com/sd031/aws_codebuild_codedeploy_nodeJs_demo.git'
       }
     }
      
-    stage('Build') {
+    stage('Build:Node') {
       steps {
         sh 'npm install'
         // sh '<<Build Command>>' run any commands as needed
@@ -23,5 +23,11 @@ pipeline {
     //     sh 'node test'
     //   }
     // }
+
+     stage('Save:Artifact') {
+      steps {
+       archiveArtifacts artifacts: ./
+      }
+    }  
   }
 }
