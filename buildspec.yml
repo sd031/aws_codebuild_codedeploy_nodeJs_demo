@@ -24,8 +24,4 @@ phases:
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
 artifacts:
     files: imagedefinitions.json
-cache:
-  paths:
-    - '/root/.m2/**/*'
-    - '/root/.npm/**/*'
-    - 'node_modules/**/*'
+
