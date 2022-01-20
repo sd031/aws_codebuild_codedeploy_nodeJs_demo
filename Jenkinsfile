@@ -1,45 +1,36 @@
 pipeline {
     agent any
-    tools {nodejs "node16" }
+    tools {nodejs "node17"}
     environment {
         NODE_ENV='production'
     }
-    
-  
+
     stages {
         stage('source') {
             steps {
-               git 'https://github.com/sd031/aws_codebuild_codedeploy_nodeJs_demo.git'
-               sh 'cat index.js'
+                git 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo.git'
             }
-            
         }
         
-         stage('build') {
-             environment{
-                 NODE_ENV='StagingGitTest'
-             }
-             
-            
+        stage('build') {
             steps {
-             echo NODE_ENV
-             withCredentials([string(credentialsId: 'e8f8ff88-49e0-433a-928d-36a518cd30d6', variable: 'secver')]) {
-                // some block
-                echo secver
+                echo NODE_ENV
+                withCredentials([string(credentialsId: '22b3c2c9-bcab-4d44-af8b-e02817da1f96', variable: 'secvar')]) {
+                    // some block
+                    echo secvar
+                }
+                sh 'npm install'
             }
-                         sh 'npm install'
-            }
-            
         }
         
          stage('saveArtifact') {
+             environment{
+                 NODE_ENV='artifact'
+             }
             steps {
-              archiveArtifacts artifacts: '**', followSymlinks: false
+                echo NODE_ENV
+                archiveArtifacts artifacts: '**', followSymlinks: false
             }
-            
         }
-        
-        
-        
     }
 }
