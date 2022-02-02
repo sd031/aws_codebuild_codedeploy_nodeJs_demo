@@ -81,20 +81,18 @@ node {
           if(it.key == 'newfolderjob' && it.value) {
               DOCKERFILE = 'Dockerfile'
               IMAGE_REPO_NAME="newfolderjob"
-              IMAGE_TAG="jenkins-test"
               REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
           } else if(it.key == 'newfolderjob2' && it.value) {
               DOCKERFILE = 'Dockerfile'
               IMAGE_REPO_NAME="newfolderjob2"
-              IMAGE_TAG="jenkins-test"
               REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
           } else {
               DOCKERFILE = 'Dockerfile'
               IMAGE_REPO_NAME="standardjob"
-              IMAGE_TAG="jenkins-test"
               REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
           }
-
+          
+          IMAGE_TAG = sh (script: 'git rev-parse --short HEAD',returnStdout: true).trim()
 
           if(IMAGE_REPO_NAME && IMAGE_TAG && REPOSITORY_URI && DOCKERFILE) {
               stage('Building image') {
