@@ -113,4 +113,8 @@ node {
         }
     }
   }
+
+  stage('Clean workspace') {      
+    sh "rm -r *"           
+  }
 }
