@@ -51,7 +51,13 @@ node {
   }
         
   stage('Cloning Git') {           
-    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo.git']]])                 
+    checkout([
+      $class: 'GitSCM', 
+      branches: [[name: '*/master']], 
+      doGenerateSubmoduleConfigurations: false, 
+      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'CodeDir']], 
+      submoduleCfg: [], 
+      userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo.git']]])                 
   }
 
   def jobs
@@ -93,6 +99,16 @@ node {
             stage('Pushing to ECR') {         
                 sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}"
                 sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"                            
+            }
+
+            stage('Cloning Terraform Git') {           
+                checkout([
+                  $class: 'GitSCM', 
+                  branches: [[name: '*/master']], 
+                  doGenerateSubmoduleConfigurations: false, 
+                  extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'TerraformDir']], 
+                  submoduleCfg: [], 
+                  userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo_terraform.git']]])                 
             }
         }
     }
