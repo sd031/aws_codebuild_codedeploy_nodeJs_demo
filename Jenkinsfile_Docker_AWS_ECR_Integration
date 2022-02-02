@@ -64,57 +64,70 @@ node {
       userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo.git']]])                 
   }
 
-  def jobs
-  stage('Checking for jobs to run') {
-    jobs = jobsToRun(currentBuild, jobsByPath)        
-  }
+  dir("${env.WORKSPACE}/CodeDir"){  
+    def jobs
+    stage('Checking for jobs to run') {
+      jobs = jobsToRun(currentBuild, jobsByPath)        
+    }
     
-  if(jobs){
-    def IMAGE_REPO_NAME
-    def IMAGE_TAG
-    def REPOSITORY_URI
-    def DOCKERFILE
+    if(jobs){
+      def IMAGE_REPO_NAME
+      def IMAGE_TAG
+      def REPOSITORY_URI
+      def DOCKERFILE
 
-    jobs.each{
-        //This can be extracted to function to prevent code repeating
-        if(it.key == 'newfolderjob' && it.value) {
-            DOCKERFILE = 'Dockerfile'
-            IMAGE_REPO_NAME="newfolderjob"
-            IMAGE_TAG="jenkins-test"
-            REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-        } else if(it.key == 'newfolderjob2' && it.value) {
-            DOCKERFILE = 'Dockerfile'
-            IMAGE_REPO_NAME="newfolderjob2"
-            IMAGE_TAG="jenkins-test"
-            REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-        } else {
-            DOCKERFILE = 'Dockerfile'
-            IMAGE_REPO_NAME="standardjob"
-            IMAGE_TAG="jenkins-test"
-            REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-        }
+      jobs.each{
+          //This can be extracted to function to prevent code repeating
+          if(it.key == 'newfolderjob' && it.value) {
+              DOCKERFILE = 'Dockerfile'
+              IMAGE_REPO_NAME="newfolderjob"
+              IMAGE_TAG="jenkins-test"
+              REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+          } else if(it.key == 'newfolderjob2' && it.value) {
+              DOCKERFILE = 'Dockerfile'
+              IMAGE_REPO_NAME="newfolderjob2"
+              IMAGE_TAG="jenkins-test"
+              REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+          } else {
+              DOCKERFILE = 'Dockerfile'
+              IMAGE_REPO_NAME="standardjob"
+              IMAGE_TAG="jenkins-test"
+              REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+          }
 
 
-        if(IMAGE_REPO_NAME && IMAGE_TAG && REPOSITORY_URI && DOCKERFILE) {
-            stage('Building image') {
-                dockerImage = docker.build("${IMAGE_REPO_NAME}:${IMAGE_TAG}", "-f ${DOCKERFILE} .")                         
-            }
+          if(IMAGE_REPO_NAME && IMAGE_TAG && REPOSITORY_URI && DOCKERFILE) {
+              stage('Building image') {
+                  dockerImage = docker.build("${IMAGE_REPO_NAME}:${IMAGE_TAG}", "-f ${DOCKERFILE} .")                         
+              }
    
-            stage('Pushing to ECR') {         
-                sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}"
-                sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"                            
-            }
+              stage('Pushing to ECR') {         
+                  sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}"
+                  sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"                            
+              }
 
-            stage('Cloning Terraform Git') {           
-                checkout([
-                  $class: 'GitSCM', 
-                  branches: [[name: '*/master']], 
-                  doGenerateSubmoduleConfigurations: false, 
-                  extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'TerraformDir']], 
-                  submoduleCfg: [], 
-                  userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo_terraform.git']]])                 
-            }
-        }
+              dir("${env.WORKSPACE}"){  
+                stage('Cloning Terraform Git') {           
+                    checkout([
+                      $class: 'GitSCM', 
+                      branches: [[name: '*/master']], 
+                      doGenerateSubmoduleConfigurations: false, 
+                      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'TerraformDir']], 
+                      submoduleCfg: [], 
+                      userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo_terraform.git']]])                 
+                } 
+              }
+              dir("${env.WORKSPACE}/TerraformDir/dev"){
+                  stage('Terraform Init') {     
+                      sh 'terraform init -no-color'
+                  }
+                
+                  stage('Terraform Apply') {     
+                      sh 'terraform apply -auto-approve -no-color'
+                  }
+              }
+          }
+      }
     }
   }
 }
