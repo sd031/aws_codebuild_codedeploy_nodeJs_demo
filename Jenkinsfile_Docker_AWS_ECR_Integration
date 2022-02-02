@@ -121,7 +121,7 @@ node {
                   }
                 
                   stage('Terraform Apply') {     
-                      sh 'terraform apply -auto-approve -no-color'
+                      sh 'terraform apply -var="image_tag=$IMAGE_TAG" -auto-approve -no-color'
                   }
               }
           }
