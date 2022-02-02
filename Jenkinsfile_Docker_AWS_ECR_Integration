@@ -45,7 +45,11 @@ node {
   //This can be moved to global variables or external property file
   def AWS_ACCOUNT_ID="246005639140"
   def AWS_DEFAULT_REGION="eu-central-1" 
-           
+
+  stage('Clean workspace') {      
+    sh "rm -r *"           
+  }
+
   stage('Logging into AWS ECR') {      
     sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"           
   }
@@ -112,9 +116,5 @@ node {
             }
         }
     }
-  }
-
-  stage('Clean workspace') {      
-    sh "rm -r *"           
   }
 }
