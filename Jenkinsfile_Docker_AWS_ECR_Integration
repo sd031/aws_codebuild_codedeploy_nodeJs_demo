@@ -91,17 +91,15 @@ node {
           if(it.key == 'newfolderjob' && it.value) {
               DOCKERFILE = 'Dockerfile'
               IMAGE_REPO_NAME="newfolderjob"
-              REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
           } else if(it.key == 'newfolderjob2' && it.value) {
               DOCKERFILE = 'Dockerfile'
               IMAGE_REPO_NAME="newfolderjob2"
-              REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
           } else {
               DOCKERFILE = 'Dockerfile'
-              IMAGE_REPO_NAME="standardjob"
-              REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+              IMAGE_REPO_NAME="standardjob"     
           }
           
+          REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
           IMAGE_TAG = sh (script: 'git rev-parse --short HEAD',returnStdout: true).trim()
 
           if(IMAGE_REPO_NAME && IMAGE_TAG && REPOSITORY_URI && DOCKERFILE) {
@@ -120,7 +118,10 @@ node {
                   }
                 
                   stage('Terraform Apply') {     
-                      sh "terraform apply -var=\"image_tag=${IMAGE_TAG}\" -auto-approve -no-color"
+                      sh ("""terraform apply \
+                      -var=\"docker_image_tag=${IMAGE_TAG}\" \
+                      -var-file=\"./task-definition-variables/${IMAGE_REPO_NAME}.tfvars\" \
+                      -auto-approve -no-color""")
                   }
               }
           }
