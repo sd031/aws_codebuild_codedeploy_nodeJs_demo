@@ -3,9 +3,9 @@ import jenkins.model.*;
 
 // List all services paths for which docker image will be builded if something changed
 def jobsByPath = [
-    "newfolder/": "newfolderjob",
-    "newfolder2/": "newfolderjob2",
-    "index.js": "standardjob"
+   "/job1/": "job1",
+    "/job2/": "job2",
+    "/job3/": "job3"
   ]
 
 def jobsToRun(build, jobsByPath) {
@@ -88,15 +88,15 @@ node {
 
       jobs.each{
           //This can be extracted to function to prevent code repeating
-          if(it.key == 'newfolderjob' && it.value) {
+          if(it.key == 'job1' && it.value) {
               DOCKERFILE = 'Dockerfile'
-              IMAGE_REPO_NAME="newfolderjob"
-          } else if(it.key == 'newfolderjob2' && it.value) {
+              IMAGE_REPO_NAME="job1"
+          } else if(it.key == 'job2' && it.value) {
               DOCKERFILE = 'Dockerfile'
-              IMAGE_REPO_NAME="newfolderjob2"
-          } else {
+              IMAGE_REPO_NAME="job2"
+          } else if(it.key == 'job3' && it.value) {
               DOCKERFILE = 'Dockerfile'
-              IMAGE_REPO_NAME="standardjob"     
+              IMAGE_REPO_NAME="job3"     
           }
           
           REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
