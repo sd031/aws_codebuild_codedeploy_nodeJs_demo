@@ -3,9 +3,9 @@ import jenkins.model.*;
 
 // List all services paths for which docker image will be builded if something changed
 def jobsByPath = [
-   "/job1/": "job1",
-    "/job2/": "job2",
-    "/job3/": "job3"
+   "job1/": "job1",
+    "job2/": "job2",
+    "job3/": "job3"
   ]
 
 def jobsToRun(build, jobsByPath) {
