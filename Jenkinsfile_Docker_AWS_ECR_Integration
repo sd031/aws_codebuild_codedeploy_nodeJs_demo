@@ -81,12 +81,14 @@ node {
     }
     
     if(jobs){
-      def IMAGE_REPO_NAME
-      def IMAGE_TAG
-      def REPOSITORY_URI
-      def DOCKERFILE
+      def newImageMap = [:]
 
       jobs.each{
+          def IMAGE_REPO_NAME
+          def IMAGE_TAG
+          def REPOSITORY_URI
+          def DOCKERFILE
+
           //This can be extracted to function to prevent code repeating
           if(it.key == 'job1' && it.value) {
               DOCKERFILE = 'Dockerfile'
@@ -112,19 +114,23 @@ node {
                   sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"                            
               }
 
-              dir("${env.WORKSPACE}/TerraformDir/dev"){
+              newImageMap.IMAGE_REPO_NAME = IMAGE_TAG
+          }
+      }
+
+      newImageMap.each{
+        dir("${env.WORKSPACE}/TerraformDir/dev"){
                   stage('Terraform Init') {     
                       sh 'terraform init -no-color'
                   }
                 
                   stage('Terraform Apply') {     
                       sh ("""terraform apply \
-                      -var=\"docker_image_tag=${IMAGE_TAG}\" \
-                      -var-file=\"./task-definition-variables/${IMAGE_REPO_NAME}.tfvars\" \
+                      -var=\"docker_image_tag=${it.value}\" \
+                      -var-file=\"./task-definition-variables/${it.key}.tfvars\" \
                       -auto-approve -no-color""")
                   }
               }
-          }
       }
     }
   }
