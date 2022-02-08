@@ -57,7 +57,7 @@ def addJob2_2IfJob2_1Present(jobsToRun) {
   def job2_1Present = false
   jobsToRun.each{ 
     if(it.key == 'job2_1' && it.value) {
-      job2_1Present == true
+      job2_1Present = true
     }
   }
   if(job2_1Present) {
