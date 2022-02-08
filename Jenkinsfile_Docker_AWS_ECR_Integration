@@ -127,7 +127,6 @@ node {
                   stage('Terraform Apply') {     
                       sh ("""terraform apply \
                       -var=\"docker_image_tag=${it.value}\" \
-                      -var-file=\"./task-definition-variables/${it.key}.tfvars\" \
                       -auto-approve -no-color""")
                   }
               }
