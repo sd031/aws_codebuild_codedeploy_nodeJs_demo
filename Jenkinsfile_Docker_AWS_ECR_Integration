@@ -66,7 +66,6 @@ def addJob2_2IfJob2_1Present(jobsToRun) {
 }
 
 node {
-  //This can be moved to global variables or external property file
   def AWS_ACCOUNT_ID="246005639140"
   def AWS_DEFAULT_REGION="eu-central-1" 
 
@@ -83,7 +82,7 @@ node {
       $class: 'GitSCM', 
       branches: [[name: '*/master']], 
       doGenerateSubmoduleConfigurations: false, 
-      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'CodeDir']], 
+      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'code_directory']], 
       submoduleCfg: [], 
       userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo.git']]])                 
   }
@@ -93,12 +92,12 @@ node {
       $class: 'GitSCM', 
       branches: [[name: '*/master']], 
       doGenerateSubmoduleConfigurations: false, 
-      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'TerraformDir']], 
+      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'terraform_directory']], 
       submoduleCfg: [], 
       userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo_terraform.git']]])                 
   } 
 
-  dir("${env.WORKSPACE}/CodeDir"){  
+  dir("${env.WORKSPACE}/code_directory"){  
     def jobs
     stage('Checking for jobs to run') {
       jobs = jobsToRun(currentBuild, jobsByPath)
@@ -106,7 +105,7 @@ node {
     }
     
     if(jobs){
-      def newImageMap = [:]
+      def newDockerImageMap = [:]
 
       jobs.each{
           def IMAGE_REPO_NAME
@@ -114,7 +113,6 @@ node {
           def REPOSITORY_URI
           def DOCKERFILE
 
-          //This can be extracted to function to prevent code repeating
           if(it.key == 'job1' && it.value) {
               DOCKERFILE = 'Dockerfile'
               IMAGE_REPO_NAME="job1"
@@ -139,19 +137,19 @@ node {
                   sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"                            
               }
 
-              newImageMap[IMAGE_REPO_NAME] = IMAGE_TAG
+              newDockerImageMap[IMAGE_REPO_NAME] = IMAGE_TAG
           }
       }
 
       def job2AlreadyCreated = false
-      newImageMap.each{
+      newDockerImageMap.each{
         if(it.key == 'job1') {
-          dir("${env.WORKSPACE}/TerraformDir/dev/task-definitions/job1"){
+          dir("${env.WORKSPACE}/terraform_directory/dev/task-definitions/job1"){
             runTerraform(it.value)     
           } 
         }
         if(!job2AlreadyCreated && (it.key == 'job2_1' || it.key == 'job2_2')) {
-          dir("${env.WORKSPACE}/TerraformDir/dev/task-definitions/job2"){
+          dir("${env.WORKSPACE}/terraform_directory/dev/task-definitions/job2"){
             runTerraform(it.value)     
           } 
           job2AlreadyCreated = true
