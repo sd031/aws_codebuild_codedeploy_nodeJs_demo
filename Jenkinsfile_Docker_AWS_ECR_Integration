@@ -41,6 +41,18 @@ def jobsToRun(build, jobsByPath) {
   jobsToRun
 }
 
+def runTerraform(dockerImageTag) {
+  stage('Terraform Init') {     
+    sh 'terraform init -no-color'
+  }
+                
+  stage('Terraform Apply') {     
+    sh ("""terraform apply \
+    -var=\"docker_image_tag=${dockerImageTag}\" \
+    -auto-approve -no-color""")
+  }
+}
+
 node {
   //This can be moved to global variables or external property file
   def AWS_ACCOUNT_ID="246005639140"
@@ -119,17 +131,12 @@ node {
       }
 
       newImageMap.each{
-        dir("${env.WORKSPACE}/TerraformDir/dev"){
-                  stage('Terraform Init') {     
-                      sh 'terraform init -no-color'
-                  }
-                
-                  stage('Terraform Apply') {     
-                      sh ("""terraform apply \
-                      -var=\"docker_image_tag=${it.value}\" \
-                      -auto-approve -no-color""")
-                  }
-              }
+        if(it.key == 'job1') {
+          dir("${env.WORKSPACE}/TerraformDir/dev/task-definitions/job1"){
+            runTerraform(it.value)     
+          } 
+        }
+        
       }
     }
   }
