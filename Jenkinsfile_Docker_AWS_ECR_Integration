@@ -4,7 +4,8 @@ import jenkins.model.*;
 // List all services paths for which docker image will be builded if something changed
 def jobsByPath = [
    "job1/": "job1",
-    "job2/": "job2",
+    "job2/": "job2_1",
+    "job2/": "job2_2",
     "job3/": "job3"
   ]
 
@@ -105,12 +106,12 @@ node {
           if(it.key == 'job1' && it.value) {
               DOCKERFILE = 'Dockerfile'
               IMAGE_REPO_NAME="job1"
-          } else if(it.key == 'job2' && it.value) {
+          } else if(it.key == 'job2_1' && it.value) {
               DOCKERFILE = 'Dockerfile'
-              IMAGE_REPO_NAME="job2"
-          } else if(it.key == 'job3' && it.value) {
+              IMAGE_REPO_NAME="job2_1"
+          } else if(it.key == 'job2_2' && it.value) {
               DOCKERFILE = 'Dockerfile'
-              IMAGE_REPO_NAME="job3"     
+              IMAGE_REPO_NAME="job2_2"     
           }
           
           REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
@@ -130,13 +131,19 @@ node {
           }
       }
 
+      def job2AlreadyCreated = false
       newImageMap.each{
         if(it.key == 'job1') {
           dir("${env.WORKSPACE}/TerraformDir/dev/task-definitions/job1"){
             runTerraform(it.value)     
           } 
         }
-        
+        if(!job2AlreadyCreated && (it.key == 'job2_1' || it.key == 'job2_2')) {
+          dir("${env.WORKSPACE}/TerraformDir/dev/task-definitions/job2"){
+            runTerraform(it.value)     
+          } 
+          job2AlreadyCreated = true
+        }
       }
     }
   }
