@@ -5,7 +5,6 @@ import jenkins.model.*;
 def jobsByPath = [
    "job1/": "job1",
     "job2/": "job2_1",
-    "job2/": "job2_2",
     "job3/": "job3"
   ]
 
@@ -54,6 +53,18 @@ def runTerraform(dockerImageTag) {
   }
 }
 
+def addJob2_2IfJob2_1Present(jobsToRun) {
+  def job2_1Present = false
+  jobsToRun.each{ 
+    if(it.key == 'job2_1' && it.value) {
+      job2_1Present == true
+    }
+  }
+  if(job2_1Present) {
+    jobsToRun["job2_2"] = true
+  }
+}
+
 node {
   //This can be moved to global variables or external property file
   def AWS_ACCOUNT_ID="246005639140"
@@ -90,7 +101,8 @@ node {
   dir("${env.WORKSPACE}/CodeDir"){  
     def jobs
     stage('Checking for jobs to run') {
-      jobs = jobsToRun(currentBuild, jobsByPath)        
+      jobs = jobsToRun(currentBuild, jobsByPath)
+      addJob2_2IfJob2_1Present(jobs)
     }
     
     if(jobs){
