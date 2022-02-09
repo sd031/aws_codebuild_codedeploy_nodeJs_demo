@@ -71,7 +71,7 @@ def createTaskDefinitions(newDockerImageMap) {
   }
 }
 
-def createDockerImages(currentBuild, newDockerImageMap, jobsByProjectPath) {
+def createDockerImages(currentBuild, newDockerImageMap, jobsByProjectPath, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION) {
   dir("${env.WORKSPACE}/code_directory"){  
     def jobs
     stage('Checking for jobs to run') {
