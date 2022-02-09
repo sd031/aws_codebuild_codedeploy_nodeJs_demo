@@ -1,14 +1,15 @@
 import jenkins.*;
 import jenkins.model.*;
 
-// List all services paths for which docker image will be builded if something changed
-def jobsByPath = [
+// List all project paths for which git commit is watched
+def jobsByProjectPath = [
    "job1/": "job1",
     "job2/": "job2_1",
     "job3/": "job3"
   ]
 
-def jobsToRun(build, jobsByPath) {
+// Find all jobs for project paths in which git commit happend
+def jobsToRun(build, jobsByProjectPath) {
   // Listing changes files since last build
   def changeLogSets = build.changeSets
   def changedFiles = []
@@ -26,7 +27,7 @@ def jobsToRun(build, jobsByPath) {
 
   // Listing jobs to run
   jobsToRun = [:]
-  for (entry in jobsByPath) {
+  for (entry in jobsByProjectPath) {
     def pattern = entry.key
     for (int i = 0; i < changedFiles.size(); i++) {
       def file = changedFiles[i]
@@ -50,6 +51,67 @@ def runTerraform(dockerImageTag) {
     sh ("""terraform apply \
     -var=\"docker_image_tag=${dockerImageTag}\" \
     -auto-approve -no-color""")
+  }
+}
+
+def createTaskDefinitions(newDockerImageMap) {
+  def job2AlreadyCreated = false
+  newDockerImageMap.each{
+    if(it.key == 'job1') {
+      dir("${env.WORKSPACE}/terraform_directory/dev/task-definitions/job1"){
+        runTerraform(it.value)     
+      } 
+    }
+    if(!job2AlreadyCreated && (it.key == 'job2_1' || it.key == 'job2_2')) {
+      dir("${env.WORKSPACE}/terraform_directory/dev/task-definitions/job2"){
+        runTerraform(it.value)     
+      } 
+      job2AlreadyCreated = true
+    }
+  }
+}
+
+def createDockerImages(currentBuild, newDockerImageMap, jobsByProjectPath) {
+  dir("${env.WORKSPACE}/code_directory"){  
+    def jobs
+    stage('Checking for jobs to run') {
+      jobs = jobsToRun(currentBuild, jobsByProjectPath)
+      addJob2_2IfJob2_1Present(jobs)
+    }
+    
+    jobs.each{
+      def IMAGE_REPO_NAME
+      def IMAGE_TAG
+      def REPOSITORY_URI
+      def DOCKERFILE
+
+      if(it.key == 'job1' && it.value) {
+        DOCKERFILE = 'Dockerfile'
+        IMAGE_REPO_NAME="job1"
+      } else if(it.key == 'job2_1' && it.value) {
+        DOCKERFILE = 'Dockerfile'
+        IMAGE_REPO_NAME="job2_1"
+      } else if(it.key == 'job2_2' && it.value) {
+        DOCKERFILE = 'Dockerfile'
+        IMAGE_REPO_NAME="job2_2"     
+      }
+          
+      REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+      IMAGE_TAG = sh (script: 'git rev-parse --short HEAD',returnStdout: true).trim()
+
+      if(IMAGE_REPO_NAME && IMAGE_TAG && REPOSITORY_URI && DOCKERFILE) {
+        stage('Building image') {
+          dockerImage = docker.build("${IMAGE_REPO_NAME}:${IMAGE_TAG}", "-f ${DOCKERFILE} .")                         
+        }
+   
+        stage('Pushing to ECR') {         
+          sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}"
+          sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"                            
+        }
+
+        newDockerImageMap[IMAGE_REPO_NAME] = IMAGE_TAG
+      }
+    } 
   }
 }
 
@@ -97,64 +159,7 @@ node {
       userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo_terraform.git']]])                 
   } 
 
-  dir("${env.WORKSPACE}/code_directory"){  
-    def jobs
-    stage('Checking for jobs to run') {
-      jobs = jobsToRun(currentBuild, jobsByPath)
-      addJob2_2IfJob2_1Present(jobs)
-    }
-    
-    if(jobs){
-      def newDockerImageMap = [:]
-
-      jobs.each{
-          def IMAGE_REPO_NAME
-          def IMAGE_TAG
-          def REPOSITORY_URI
-          def DOCKERFILE
-
-          if(it.key == 'job1' && it.value) {
-              DOCKERFILE = 'Dockerfile'
-              IMAGE_REPO_NAME="job1"
-          } else if(it.key == 'job2_1' && it.value) {
-              DOCKERFILE = 'Dockerfile'
-              IMAGE_REPO_NAME="job2_1"
-          } else if(it.key == 'job2_2' && it.value) {
-              DOCKERFILE = 'Dockerfile'
-              IMAGE_REPO_NAME="job2_2"     
-          }
-          
-          REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-          IMAGE_TAG = sh (script: 'git rev-parse --short HEAD',returnStdout: true).trim()
-
-          if(IMAGE_REPO_NAME && IMAGE_TAG && REPOSITORY_URI && DOCKERFILE) {
-              stage('Building image') {
-                  dockerImage = docker.build("${IMAGE_REPO_NAME}:${IMAGE_TAG}", "-f ${DOCKERFILE} .")                         
-              }
-   
-              stage('Pushing to ECR') {         
-                  sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}"
-                  sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"                            
-              }
-
-              newDockerImageMap[IMAGE_REPO_NAME] = IMAGE_TAG
-          }
-      }
-
-      def job2AlreadyCreated = false
-      newDockerImageMap.each{
-        if(it.key == 'job1') {
-          dir("${env.WORKSPACE}/terraform_directory/dev/task-definitions/job1"){
-            runTerraform(it.value)     
-          } 
-        }
-        if(!job2AlreadyCreated && (it.key == 'job2_1' || it.key == 'job2_2')) {
-          dir("${env.WORKSPACE}/terraform_directory/dev/task-definitions/job2"){
-            runTerraform(it.value)     
-          } 
-          job2AlreadyCreated = true
-        }
-      }
-    }
-  }
+  def newDockerImageMap = [:]
+  createDockerImages(currentBuild, newDockerImageMap, jobsByProjectPath)
+  createTaskDefinitions(newDockerImageMap)
 }
