@@ -160,6 +160,6 @@ node {
   } 
 
   def newDockerImageMap = [:]
-  createDockerImages(currentBuild, newDockerImageMap, jobsByProjectPath)
+  createDockerImages(currentBuild, newDockerImageMap, jobsByProjectPath, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION)
   createTaskDefinitions(newDockerImageMap)
 }
