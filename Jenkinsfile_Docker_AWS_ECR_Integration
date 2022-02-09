@@ -42,6 +42,28 @@ def jobsToRun(build, jobsByProjectPath) {
   jobsToRun
 }
 
+def cloneGitRepo() {
+  stage('Cloning Git') {           
+    checkout([
+      $class: 'GitSCM', 
+      branches: [[name: '*/master']], 
+      doGenerateSubmoduleConfigurations: false, 
+      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'code_directory']], 
+      submoduleCfg: [], 
+      userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo.git']]])                 
+  }
+
+  stage('Cloning Terraform Git') {           
+    checkout([
+      $class: 'GitSCM', 
+      branches: [[name: '*/master']], 
+      doGenerateSubmoduleConfigurations: false, 
+      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'terraform_directory']], 
+      submoduleCfg: [], 
+      userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo_terraform.git']]])                 
+  } 
+}
+
 def runTerraform(dockerImageTag) {
   stage('Terraform Init') {     
     sh 'terraform init -no-color'
@@ -71,10 +93,11 @@ def createTaskDefinitions(newDockerImageMap) {
   }
 }
 
-def createDockerImages(currentBuild, newDockerImageMap, jobsByProjectPath, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION) {
+def createDockerImages(currentBuild, jobsByProjectPath, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION) {
+  def newDockerImageMap = [:]
   dir("${env.WORKSPACE}/code_directory"){  
     def jobs
-    stage('Checking for jobs to run') {
+    stage('Check jobs to run') {
       jobs = jobsToRun(currentBuild, jobsByProjectPath)
       addJob2_2IfJob2_1Present(jobs)
     }
@@ -104,7 +127,7 @@ def createDockerImages(currentBuild, newDockerImageMap, jobsByProjectPath, AWS_A
           dockerImage = docker.build("${IMAGE_REPO_NAME}:${IMAGE_TAG}", "-f ${DOCKERFILE} .")                         
         }
    
-        stage('Pushing to ECR') {         
+        stage('Push image to ECR') {         
           sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}"
           sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"                            
         }
@@ -113,6 +136,7 @@ def createDockerImages(currentBuild, newDockerImageMap, jobsByProjectPath, AWS_A
       }
     } 
   }
+  return newDockerImageMap
 }
 
 def addJob2_2IfJob2_1Present(jobsToRun) {
@@ -139,27 +163,7 @@ node {
     sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"           
   }
         
-  stage('Cloning Git') {           
-    checkout([
-      $class: 'GitSCM', 
-      branches: [[name: '*/master']], 
-      doGenerateSubmoduleConfigurations: false, 
-      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'code_directory']], 
-      submoduleCfg: [], 
-      userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo.git']]])                 
-  }
-
-  stage('Cloning Terraform Git') {           
-    checkout([
-      $class: 'GitSCM', 
-      branches: [[name: '*/master']], 
-      doGenerateSubmoduleConfigurations: false, 
-      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'terraform_directory']], 
-      submoduleCfg: [], 
-      userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo_terraform.git']]])                 
-  } 
-
-  def newDockerImageMap = [:]
-  createDockerImages(currentBuild, newDockerImageMap, jobsByProjectPath, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION)
+  cloneGitRepo()
+  def newDockerImageMap = createDockerImages(currentBuild, jobsByProjectPath, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION)
   createTaskDefinitions(newDockerImageMap)
 }
