@@ -96,7 +96,7 @@ def createTaskDefinitions(newDockerImageMap) {
   }
 }
 
-def buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, newDockerImageMap) {
+def buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION, newDockerImageMap) {
   def REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
 
   stage('Building image') {
@@ -128,21 +128,21 @@ def createAndPushDockerImages(currentBuild, jobsByProjectPath, AWS_ACCOUNT_ID, A
       if(it.key == 'job1' && it.value) {
         DOCKERFILE = 'Dockerfile'
         IMAGE_REPO_NAME="job1"
-        buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, newDockerImageMap)
+        buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION, newDockerImageMap)
       } else if(it.key == 'job3' && it.value) {
         DOCKERFILE = 'DockerfileJob3'
         IMAGE_REPO_NAME="job3"
         dir("${env.WORKSPACE}/code_directory/job3"){
-          buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, newDockerImageMap)
+          buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION, newDockerImageMap)
         }
       } else if(it.key == 'job2_1' && it.value) {
         DOCKERFILE = 'Dockerfile'
         IMAGE_REPO_NAME="job2_1"   
-        buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, newDockerImageMap)  
+        buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION, newDockerImageMap)  
       } else if(it.key == 'job2_2' && it.value) {
         DOCKERFILE = 'Dockerfile'
         IMAGE_REPO_NAME="job2_2"
-        buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, newDockerImageMap)   
+        buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION, newDockerImageMap)   
       }
     } 
   }
