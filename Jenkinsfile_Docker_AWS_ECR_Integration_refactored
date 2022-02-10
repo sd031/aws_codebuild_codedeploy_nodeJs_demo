@@ -1,0 +1,180 @@
+import jenkins.*;
+import jenkins.model.*;
+
+// List all project paths for which git commit is watched
+def jobsByProjectPath = [
+    "job1/": "job1",
+    "job2/": "job2_1",
+    "job3/": "job3"
+  ]
+
+// Find all jobs for project paths in which git commit happend
+def jobsToRun(build, jobsByProjectPath) {
+  // Listing changes files since last build
+  def changeLogSets = build.changeSets
+  def changedFiles = []
+  for (int i = 0; i < changeLogSets.size(); i++) {
+    def entries = changeLogSets[i].items
+    for (int j = 0; j < entries.length; j++) {
+      def entry = entries[j]
+      def files = new ArrayList(entry.affectedFiles)
+      for (int k = 0; k < files.size(); k++) {
+        def file = files[k]
+        changedFiles.add(file.path)
+      }
+    }
+  }
+
+  // Listing jobs to run
+  jobsToRun = [:]
+  for (entry in jobsByProjectPath) {
+    def pattern = entry.key
+    for (int i = 0; i < changedFiles.size(); i++) {
+      def file = changedFiles[i]
+      if (file.contains(pattern)) {
+        def jobName = entry.value
+        jobsToRun[jobName] = true
+        break
+      }
+    }
+  }
+
+  jobsToRun
+}
+
+def cloneGitRepo() {
+  stage('Cloning Git') {           
+    checkout([
+      $class: 'GitSCM', 
+      branches: [[name: '*/master']], 
+      doGenerateSubmoduleConfigurations: false, 
+      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'code_directory']], 
+      submoduleCfg: [], 
+      userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo.git']]])                 
+  }
+
+  stage('Cloning Terraform Git') {           
+    checkout([
+      $class: 'GitSCM', 
+      branches: [[name: '*/master']], 
+      doGenerateSubmoduleConfigurations: false, 
+      extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'terraform_directory']], 
+      submoduleCfg: [], 
+      userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/demask/aws_codebuild_codedeploy_nodeJs_demo_terraform.git']]])                 
+  } 
+}
+
+def runTerraform(dockerImageTag) {
+  stage('Terraform Init') {     
+    sh 'terraform init -no-color'
+  }
+                
+  stage('Terraform Apply') {     
+    sh ("""terraform apply \
+    -var=\"docker_image_tag=${dockerImageTag}\" \
+    -auto-approve -no-color""")
+  }
+}
+
+def createTaskDefinitions(newDockerImageMap) {
+  def jobAlreadyCreated = false
+  newDockerImageMap.each{
+    if(it.key == 'job1') {
+      dir("${env.WORKSPACE}/terraform_directory/dev/task-definitions/job1"){
+        runTerraform(it.value)     
+      } 
+    } else if(it.key == 'job3') {
+      dir("${env.WORKSPACE}/terraform_directory/dev/task-definitions/job3"){
+        runTerraform(it.value)     
+      } 
+    } else if(!jobAlreadyCreated && (it.key == 'job2_1' || it.key == 'job2_2')) {
+      dir("${env.WORKSPACE}/terraform_directory/dev/task-definitions/job2"){
+        runTerraform(it.value)     
+      } 
+      jobAlreadyCreated = true
+    }
+  }
+}
+
+def buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, newDockerImageMap) {
+  def REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+
+  stage('Building image') {
+    dockerImage = docker.build("${IMAGE_REPO_NAME}:${IMAGE_TAG}", "-f ${DOCKERFILE} .")                         
+  }
+   
+  stage('Push image to ECR') {         
+    sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:${IMAGE_TAG}"
+    sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"                            
+  }
+
+  newDockerImageMap[IMAGE_REPO_NAME] = IMAGE_TAG
+}
+
+def createAndPushDockerImages(currentBuild, jobsByProjectPath, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION) {
+  def newDockerImageMap = [:]
+  dir("${env.WORKSPACE}/code_directory"){  
+    def jobs
+    stage('Check jobs to run') {
+      jobs = jobsToRun(currentBuild, jobsByProjectPath)
+      addPhpIfNginxPresent(jobs)
+    }
+    
+    def IMAGE_TAG = sh (script: 'git rev-parse --short HEAD',returnStdout: true).trim()
+    jobs.each{
+      def IMAGE_REPO_NAME
+      def DOCKERFILE
+
+      if(it.key == 'job1' && it.value) {
+        DOCKERFILE = 'Dockerfile'
+        IMAGE_REPO_NAME="job1"
+        buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, newDockerImageMap)
+      } else if(it.key == 'job3' && it.value) {
+        DOCKERFILE = 'DockerfileJob3'
+        IMAGE_REPO_NAME="job3"
+        dir("${env.WORKSPACE}/code_directory/job3"){
+          buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, newDockerImageMap)
+        }
+      } else if(it.key == 'job2_1' && it.value) {
+        DOCKERFILE = 'Dockerfile'
+        IMAGE_REPO_NAME="job2_1"   
+        buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, newDockerImageMap)  
+      } else if(it.key == 'job2_2' && it.value) {
+        DOCKERFILE = 'Dockerfile'
+        IMAGE_REPO_NAME="job2_2"
+        buildDockerImage(IMAGE_TAG, IMAGE_REPO_NAME, DOCKERFILE, AWS_ACCOUNT_ID, newDockerImageMap)   
+      }
+    } 
+  }
+
+  return newDockerImageMap
+}
+
+def addPhpIfNginxPresent(jobsToRun) {
+  def nginxPresent = false
+  jobsToRun.each{ 
+    if(it.key == 'job2_1' && it.value) {
+      nginxPresent = true
+    }
+  }
+  if(nginxPresent) {
+    jobsToRun["job2_2"] = true
+  }
+}
+
+node {
+  def AWS_ACCOUNT_ID="246005639140"
+  def AWS_DEFAULT_REGION="eu-central-1" 
+
+  stage('Clean workspace') {      
+    sh "rm -r *"           
+  }
+
+  stage('Logging into AWS ECR') {      
+    sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"           
+  }
+        
+  cloneGitRepo()
+  def newDockerImageMap = createAndPushDockerImages(currentBuild, jobsByProjectPath, AWS_ACCOUNT_ID, AWS_DEFAULT_REGION)
+  createTaskDefinitions(newDockerImageMap)
+}
