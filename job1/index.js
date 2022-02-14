@@ -5,7 +5,7 @@ const config = require('config')
 console.log(config);
 
 app.get('/', (req, res) => {
-  res.send('CICD App V132')
+  res.send('CICD App V133')
 })
 
 app.get('/status', (req, res) => {
