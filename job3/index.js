@@ -1,11 +1,11 @@
 const express = require('express')
 const app = express()
-const port = process.env.PORT || 3000 ;
+const port = process.env.PORT || 8043 ;
 const config = require('config')
 console.log(config);
 
 app.get('/', (req, res) => {
-  res.send('CICD App V6!')
+  res.send('CICD App V7!')
 })
 
 app.get('/status', (req, res) => {
