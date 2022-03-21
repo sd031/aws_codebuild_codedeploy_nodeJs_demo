@@ -23,7 +23,7 @@ pipeline {
             
             steps {
              echo NODE_ENV
-             withCredentials([string(credentialsId: 'e8f8ff88-49e0-433a-928d-36a518cd30d6', variable: 'secver')]) {
+             withCredentials([string(credentialsId: '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', variable: 'secver')]) {
                 // some block
                 echo secver
             }
