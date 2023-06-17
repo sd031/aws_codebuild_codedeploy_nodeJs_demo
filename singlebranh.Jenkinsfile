@@ -10,8 +10,8 @@ pipeline {
        
         stage('source') {
             steps {
-               checkout scm
-               sh 'ls -la'
+               git credentialsId: '296b18ab-4260-44bd-ba13-0c8b6f6208a5', url: 'https://github.com/sd031/aws_codebuild_codedeploy_nodeJs_demo'
+               sh 'cat index.js'
             }
             
         }
