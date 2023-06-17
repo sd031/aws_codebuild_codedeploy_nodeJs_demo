@@ -27,7 +27,7 @@ pipeline {
             //     // some block
             //     echo secver
             // }
-            sh 'npm install'
+            sh 'npm installer'
             }
             
         }
