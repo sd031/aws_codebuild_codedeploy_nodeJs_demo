@@ -1,5 +1,5 @@
 pipeline {
-    agent ec2Agent
+    agent { ec2Agent }
     tools {nodejs "node16" }
     environment {
         NODE_ENV='production'
