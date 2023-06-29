@@ -19,15 +19,15 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon EKS...
-      - aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name $AWS_CLUSTER_NAME
+      - aws eks --region ap-south-1 update-kubeconfig --name cicd-demo
       - echo check config 
       - kubectl config view --minify
       - echo check kubectl access
       - kubectl get svc
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
-      - docker pull $REPOSITORY_URI:$IMAGE_TAG
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 653470767467.dkr.ecr.ap-south-1.amazonaws.com
+      - REPOSITORY_URI=653470767467.dkr.ecr.ap-south-1.amazonaws.com/newimage:latest
+      - docker pull 653470767467.dkr.ecr.ap-south-1.amazonaws.com/newimage
       
 
   build:
