@@ -8,7 +8,7 @@ pipeline {
         stage('Source') {
             steps {
                 echo 'Hello, Harry Jenkins pipeline demo'
-                git branch: 'Master', url: 'https://github.com/Mynotesoracledba/SampleJenkinsproject.git'
+                git branch: 'Master', url: 'https://github.com/yourskaja1216/samplejenkinsproject.git'
                 sh 'cat web_scrapper.py'
             }
         }
