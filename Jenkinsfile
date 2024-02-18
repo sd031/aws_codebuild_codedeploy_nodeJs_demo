@@ -9,26 +9,20 @@ pipeline {
             steps {
                 echo 'Hello, Harry Jenkins pipeline demo'
                 git branch: 'Master', url: 'https://github.com/yourskaja1216/samplejenkinsproject.git'
-                sh 'cat web_scrapper.py'
             }
         }
         stage('Version') {
             steps {
                 echo 'Check the Python version'
                 sh 'python3 --version'
+                sh 'sudo apt-get install apache2 -y'
+                sh 'sudo service apache2 start'
             }
         }
         stage('Build') {
            steps {
                 echo 'Build Demo'
-                sh 'pip install -r requirement.txt'
-            }
-        }
-    
-         stage('Deploy') {
-           steps {
-                echo 'Depoly Demo'
-                sh 'python3 web_scrapper.py'
+                sh 'sudo cp -R * /var/www/html/'
             }
         }
 
